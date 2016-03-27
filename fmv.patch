@@ -1,0 +1,24 @@
+--- libogg-1.3.2/src/framing.c~	2014-05-27 19:52:34.000000000 +0000
++++ libogg-1.3.2/src/framing.c	2016-03-27 02:54:41.586028010 +0000
+@@ -89,7 +89,9 @@
+      ogg_page_continued(page) !=0
+ */
+ 
+-int ogg_page_packets(const ogg_page *og){
++__attribute__((target_clones("arch=core-avx2","default")))
++int ogg_page_packets(const ogg_page *og)
++{
+   int i,n=og->header[26],count=0;
+   for(i=0;i<n;i++)
+     if(og->header[27+i]<255)count++;
+@@ -387,7 +389,9 @@
+ /* Conditionally flush a page; force==0 will only flush nominal-size
+    pages, force==1 forces us to flush a page regardless of page size
+    so long as there's any data available at all. */
+-static int ogg_stream_flush_i(ogg_stream_state *os,ogg_page *og, int force, int nfill){
++__attribute__((target_clones("arch=core-avx2","default")))
++static int ogg_stream_flush_i(ogg_stream_state *os,ogg_page *og, int force, int nfill)
++{
+   int i;
+   int vals=0;
+   int maxvals=(os->lacing_fill>255?255:os->lacing_fill);
