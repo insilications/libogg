@@ -4,7 +4,7 @@
 #
 Name     : libogg
 Version  : 1.3.2
-Release  : 2
+Release  : 3
 URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Summary  : Ogg Bitstream Library Development
@@ -47,6 +47,13 @@ lib components for the libogg package.
 %setup -q -n libogg-1.3.2
 
 %build
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+export CFLAGS="$CFLAGS -falign-functions=32 -flto -O3 -fno-semantic-interposition "
+export FCFLAGS="$CFLAGS -falign-functions=32 -flto -O3 -fno-semantic-interposition "
+export FFLAGS="$CFLAGS -falign-functions=32 -flto -O3 -fno-semantic-interposition "
+export CXXFLAGS="$CXXFLAGS -falign-functions=32 -flto -O3 -fno-semantic-interposition "
 %configure --disable-static
 make V=1  %{?_smp_mflags}
 
