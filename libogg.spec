@@ -4,9 +4,9 @@
 #
 Name     : libogg
 Version  : 1.3.2
-Release  : 1
-URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.zip
-Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.zip
+Release  : 2
+URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
+Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Summary  : Ogg Bitstream Library Development
 Group    : Development/Tools
 License  : BSD-3-Clause
