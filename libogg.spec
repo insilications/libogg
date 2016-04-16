@@ -4,7 +4,7 @@
 #
 Name     : libogg
 Version  : 1.3.2
-Release  : 4
+Release  : 5
 URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Summary  : Ogg Bitstream Library Development
@@ -46,13 +46,13 @@ lib components for the libogg package.
 
 
 %prep
-cd ..
 %setup -q -n libogg-1.3.2
 %patch1 -p1
 
 %build
 export CC=clang
-export CFLAGS="-g -O3 -feliminate-unused-debug-types  -pipe -Wall -D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -Wl,--copy-dt-needed-entries -m64 -march=westmere  -mtune=native -fasynchronous-unwind-tables -D_REENTRANT  -Wl,-z -Wl,now -Wl,-z -Wl,relro "
+export LD=ld.gold
+export CFLAGS="-g -O3 -feliminate-unused-debug-types  -pipe -Wall -D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -Wl,--copy-dt-needed-entries -m64 -march=westmere  -mtune=native -fasynchronous-unwind-tables -D_REENTRANT  -Wl,-z -Wl,now -Wl,-z -Wl,relro -flto"
 export CXXFLAGS=$CFLAGS
 unset LDFLAGS
 %configure --disable-static
