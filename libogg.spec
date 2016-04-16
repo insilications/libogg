@@ -12,6 +12,7 @@ Group    : Development/Tools
 License  : BSD-3-Clause
 Requires: libogg-lib
 Requires: libogg-doc
+BuildRequires : llvm-dev
 Patch1: fmv.patch
 
 %description
@@ -45,17 +46,15 @@ lib components for the libogg package.
 
 
 %prep
+cd ..
 %setup -q -n libogg-1.3.2
 %patch1 -p1
 
 %build
-export AR=gcc-ar
-export RANLIB=gcc-ranlib
-export NM=gcc-nm
-export CFLAGS="$CFLAGS -falign-functions=32 -O3 -fno-semantic-interposition "
-export FCFLAGS="$CFLAGS -falign-functions=32 -O3 -fno-semantic-interposition "
-export FFLAGS="$CFLAGS -falign-functions=32 -O3 -fno-semantic-interposition "
-export CXXFLAGS="$CXXFLAGS -falign-functions=32 -O3 -fno-semantic-interposition "
+export CC=clang
+export CFLAGS="-g -O3 -feliminate-unused-debug-types  -pipe -Wall -D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -Wl,--copy-dt-needed-entries -m64 -march=westmere  -mtune=native -fasynchronous-unwind-tables -D_REENTRANT  -Wl,-z -Wl,now -Wl,-z -Wl,relro "
+export CXXFLAGS=$CFLAGS
+unset LDFLAGS
 %configure --disable-static
 make V=1  %{?_smp_mflags}
 
