@@ -4,7 +4,7 @@
 #
 Name     : libogg
 Version  : 1.3.2
-Release  : 9
+Release  : 10
 URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Summary  : Ogg Bitstream Library Development
@@ -50,15 +50,25 @@ lib components for the libogg package.
 %patch1 -p1
 
 %build
+export LANG=C
 export CC=clang
+export CXX=clang++
 export LD=ld.gold
-export CFLAGS="-g -O3 -feliminate-unused-debug-types  -pipe -Wall -D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -Wl,--copy-dt-needed-entries -m64 -march=westmere  -mtune=native -fasynchronous-unwind-tables -D_REENTRANT  -Wl,-z -Wl,now -Wl,-z -Wl,relro -flto"
+export CFLAGS="-g -O3 -feliminate-unused-debug-types  -pipe -Wall -D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -Wl,--copy-dt-needed-entries -m64 -march=westmere  -mtune=native -fasynchronous-unwind-tables -D_REENTRANT  -Wl,-z -Wl,now -Wl,-z -Wl,relro "
 export CXXFLAGS=$CFLAGS
 unset LDFLAGS
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+export CFLAGS="$CFLAGS -O3 -flto "
+export FCFLAGS="$CFLAGS -O3 -flto "
+export FFLAGS="$CFLAGS -O3 -flto "
+export CXXFLAGS="$CXXFLAGS -O3 -flto "
 %configure --disable-static
 make V=1  %{?_smp_mflags}
 
 %check
+export LANG=C
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost
@@ -76,8 +86,8 @@ rm -rf %{buildroot}
 /usr/include/ogg/config_types.h
 /usr/include/ogg/ogg.h
 /usr/include/ogg/os_types.h
-/usr/lib64/*.so
-/usr/lib64/pkgconfig/*.pc
+/usr/lib64/libogg.so
+/usr/lib64/pkgconfig/ogg.pc
 /usr/share/aclocal/*.m4
 
 %files doc
@@ -86,4 +96,5 @@ rm -rf %{buildroot}
 
 %files lib
 %defattr(-,root,root,-)
-/usr/lib64/*.so.*
+/usr/lib64/libogg.so.0
+/usr/lib64/libogg.so.0.8.2
