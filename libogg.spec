@@ -4,7 +4,7 @@
 #
 Name     : libogg
 Version  : 1.3.2
-Release  : 10
+Release  : 11
 URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
 Summary  : Ogg Bitstream Library Development
@@ -12,7 +12,11 @@ Group    : Development/Tools
 License  : BSD-3-Clause
 Requires: libogg-lib
 Requires: libogg-doc
-BuildRequires : llvm-dev
+BuildRequires : gcc-dev32
+BuildRequires : gcc-libgcc32
+BuildRequires : gcc-libstdc++32
+BuildRequires : glibc-dev32
+BuildRequires : glibc-libc32
 Patch1: fmv.patch
 
 %description
@@ -27,6 +31,15 @@ Provides: libogg-devel
 
 %description dev
 dev components for the libogg package.
+
+
+%package dev32
+Summary: dev32 components for the libogg package.
+Group: Default
+Requires: libogg-lib32
+
+%description dev32
+dev32 components for the libogg package.
 
 
 %package doc
@@ -45,28 +58,36 @@ Group: Libraries
 lib components for the libogg package.
 
 
+%package lib32
+Summary: lib32 components for the libogg package.
+Group: Default
+
+%description lib32
+lib32 components for the libogg package.
+
+
 %prep
 %setup -q -n libogg-1.3.2
 %patch1 -p1
+pushd ..
+cp -a libogg-1.3.2 build32
+popd
 
 %build
 export LANG=C
-export CC=clang
-export CXX=clang++
-export LD=ld.gold
-export CFLAGS="-g -O3 -feliminate-unused-debug-types  -pipe -Wall -D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -Wl,--copy-dt-needed-entries -m64 -march=westmere  -mtune=native -fasynchronous-unwind-tables -D_REENTRANT  -Wl,-z -Wl,now -Wl,-z -Wl,relro "
-export CXXFLAGS=$CFLAGS
-unset LDFLAGS
-export AR=gcc-ar
-export RANLIB=gcc-ranlib
-export NM=gcc-nm
-export CFLAGS="$CFLAGS -O3 -flto "
-export FCFLAGS="$CFLAGS -O3 -flto "
-export FFLAGS="$CFLAGS -O3 -flto "
-export CXXFLAGS="$CXXFLAGS -O3 -flto "
+export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-semantic-interposition "
+export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-semantic-interposition "
+export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-semantic-interposition "
+export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -fno-semantic-interposition "
 %configure --disable-static
 make V=1  %{?_smp_mflags}
 
+pushd ../build32/
+export CFLAGS="$CFLAGS -m32"
+export CXXFLAGS="$CXXFLAGS -m32"
+%configure --disable-static  --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
+make V=1  %{?_smp_mflags}
+popd
 %check
 export LANG=C
 export http_proxy=http://127.0.0.1:9/
@@ -76,6 +97,15 @@ make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
 rm -rf %{buildroot}
+pushd ../build32/
+%make_install32
+if [ -d  %{buildroot}/usr/lib32/pkgconfig ]
+then
+pushd %{buildroot}/usr/lib32/pkgconfig
+for i in *.pc ; do mv $i 32$i ; done
+popd
+fi
+popd
 %make_install
 
 %files
@@ -90,6 +120,11 @@ rm -rf %{buildroot}
 /usr/lib64/pkgconfig/ogg.pc
 /usr/share/aclocal/*.m4
 
+%files dev32
+%defattr(-,root,root,-)
+/usr/lib32/libogg.so
+/usr/lib32/pkgconfig/32ogg.pc
+
 %files doc
 %defattr(-,root,root,-)
 %doc /usr/share/doc/libogg/*
@@ -98,3 +133,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 /usr/lib64/libogg.so.0
 /usr/lib64/libogg.so.0.8.2
+
+%files lib32
+%defattr(-,root,root,-)
+/usr/lib32/libogg.so.0
+/usr/lib32/libogg.so.0.8.2
