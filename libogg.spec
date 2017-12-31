@@ -4,7 +4,7 @@
 #
 Name     : libogg
 Version  : 1.3.3
-Release  : 14
+Release  : 16
 URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.xz
 Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.xz
 Summary  : Ogg Bitstream Library Development
@@ -73,19 +73,22 @@ lib32 components for the libogg package.
 pushd ..
 cp -a libogg-1.3.3 build32
 popd
+pushd ..
+cp -a libogg-1.3.3 buildavx512
+popd
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1510226820
+export SOURCE_DATE_EPOCH=1514681529
 export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 %configure --disable-static
-make V=1  %{?_smp_mflags}
+make  %{?_smp_mflags}
 
 pushd ../build32/
 export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
@@ -93,7 +96,14 @@ export CFLAGS="$CFLAGS -m32"
 export CXXFLAGS="$CXXFLAGS -m32"
 export LDFLAGS="$LDFLAGS -m32"
 %configure --disable-static    --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
-make V=1  %{?_smp_mflags}
+make  %{?_smp_mflags}
+popd
+pushd ../buildavx512/
+export CFLAGS="$CFLAGS -m64 -march=skylake-avx512"
+export CXXFLAGS="$CXXFLAGS -m64 -march=skylake-avx512"
+export LDFLAGS="$LDFLAGS -m64 -march=skylake-avx512"
+%configure --disable-static    --libdir=/usr/lib64/haswell/avx512_1 --bindir=/usr/bin/haswell/avx512_1
+make  %{?_smp_mflags}
 popd
 %check
 export LANG=C
@@ -103,7 +113,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1510226820
+export SOURCE_DATE_EPOCH=1514681529
 rm -rf %{buildroot}
 pushd ../build32/
 %make_install32
@@ -114,10 +124,14 @@ for i in *.pc ; do ln -s $i 32$i ; done
 popd
 fi
 popd
+pushd ../buildavx512/
+%make_install
+popd
 %make_install
 
 %files
 %defattr(-,root,root,-)
+/usr/lib64/haswell/avx512_1/pkgconfig/ogg.pc
 
 %files dev
 %defattr(-,root,root,-)
@@ -140,6 +154,9 @@ popd
 
 %files lib
 %defattr(-,root,root,-)
+/usr/lib64/haswell/avx512_1/libogg.so
+/usr/lib64/haswell/avx512_1/libogg.so.0
+/usr/lib64/haswell/avx512_1/libogg.so.0.8.3
 /usr/lib64/libogg.so.0
 /usr/lib64/libogg.so.0.8.3
 
