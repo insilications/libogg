@@ -4,7 +4,7 @@
 #
 Name     : libogg
 Version  : 1.3.3
-Release  : 18
+Release  : 19
 URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.xz
 Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.xz
 Summary  : Ogg Bitstream Library Development
@@ -74,6 +74,9 @@ pushd ..
 cp -a libogg-1.3.3 build32
 popd
 pushd ..
+cp -a libogg-1.3.3 buildavx2
+popd
+pushd ..
 cp -a libogg-1.3.3 buildavx512
 popd
 
@@ -82,7 +85,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1514681529
+export SOURCE_DATE_EPOCH=1522851103
 export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
@@ -96,6 +99,13 @@ export CFLAGS="$CFLAGS -m32"
 export CXXFLAGS="$CXXFLAGS -m32"
 export LDFLAGS="$LDFLAGS -m32"
 %configure --disable-static    --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
+make  %{?_smp_mflags}
+popd
+pushd ../buildavx2/
+export CFLAGS="$CFLAGS -m64 -march=haswell"
+export CXXFLAGS="$CXXFLAGS -m64 -march=haswell"
+export LDFLAGS="$LDFLAGS -m64 -march=haswell"
+%configure --disable-static    --libdir=/usr/lib64/haswell --bindir=/usr/bin/haswell
 make  %{?_smp_mflags}
 popd
 pushd ../buildavx512/
@@ -113,7 +123,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1514681529
+export SOURCE_DATE_EPOCH=1522851103
 rm -rf %{buildroot}
 pushd ../build32/
 %make_install32
@@ -123,6 +133,9 @@ pushd %{buildroot}/usr/lib32/pkgconfig
 for i in *.pc ; do ln -s $i 32$i ; done
 popd
 fi
+popd
+pushd ../buildavx2/
+%make_install
 popd
 pushd ../buildavx512/
 %make_install
@@ -138,6 +151,7 @@ popd
 /usr/include/ogg/config_types.h
 /usr/include/ogg/ogg.h
 /usr/include/ogg/os_types.h
+/usr/lib64/haswell/libogg.so
 /usr/lib64/libogg.so
 /usr/lib64/pkgconfig/ogg.pc
 /usr/share/aclocal/*.m4
@@ -157,6 +171,8 @@ popd
 /usr/lib64/haswell/avx512_1/libogg.so
 /usr/lib64/haswell/avx512_1/libogg.so.0
 /usr/lib64/haswell/avx512_1/libogg.so.0.8.3
+/usr/lib64/haswell/libogg.so.0
+/usr/lib64/haswell/libogg.so.0.8.3
 /usr/lib64/libogg.so.0
 /usr/lib64/libogg.so.0.8.3
 

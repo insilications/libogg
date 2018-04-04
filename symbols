@@ -14,7 +14,7 @@ libogg.so.0:ogg_stream_destroy
 libogg.so.0:ogg_stream_eos
 libogg.so.0:ogg_stream_flush
 libogg.so.0:ogg_stream_flush_fill
-libogg.so.0:ogg_stream_flush_i._GLOBAL___framing.c_A26384A8_0xa8c2289cc7a9b46d.resolver
+libogg.so.0:ogg_stream_flush_i._GLOBAL___framing.c_A26384A8_0x26d10f37f678379d.resolver
 libogg.so.0:ogg_stream_init
 libogg.so.0:ogg_stream_iovecin
 libogg.so.0:ogg_stream_packetin
