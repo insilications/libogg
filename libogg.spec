@@ -4,7 +4,7 @@
 #
 Name     : libogg
 Version  : 1.3.3
-Release  : 20
+Release  : 21
 URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.xz
 Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.xz
 Summary  : Ogg Bitstream Library Development
@@ -85,7 +85,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1523039717
+export SOURCE_DATE_EPOCH=1523043512
 export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
@@ -101,6 +101,7 @@ export LDFLAGS="$LDFLAGS -m32"
 %configure --disable-static    --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
 make  %{?_smp_mflags}
 popd
+unset PKG_CONFIG_PATH
 pushd ../buildavx2/
 export CFLAGS="$CFLAGS -m64 -march=haswell"
 export CXXFLAGS="$CXXFLAGS -m64 -march=haswell"
@@ -108,6 +109,7 @@ export LDFLAGS="$LDFLAGS -m64 -march=haswell"
 %configure --disable-static    --libdir=/usr/lib64/haswell --bindir=/usr/bin/haswell
 make  %{?_smp_mflags}
 popd
+unset PKG_CONFIG_PATH
 pushd ../buildavx512/
 export CFLAGS="$CFLAGS -m64 -march=skylake-avx512"
 export CXXFLAGS="$CXXFLAGS -m64 -march=skylake-avx512"
@@ -123,7 +125,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1523039717
+export SOURCE_DATE_EPOCH=1523043512
 rm -rf %{buildroot}
 pushd ../build32/
 %make_install32
@@ -144,7 +146,6 @@ popd
 
 %files
 %defattr(-,root,root,-)
-%exclude /usr/lib64/haswell/avx512_1/pkgconfig/ogg.pc
 
 %files dev
 %defattr(-,root,root,-)
