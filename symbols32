@@ -4,7 +4,6 @@ libogg.so.0:ogg_page_checksum_set
 libogg.so.0:ogg_page_continued
 libogg.so.0:ogg_page_eos
 libogg.so.0:ogg_page_granulepos
-libogg.so.0:ogg_page_packets
 libogg.so.0:ogg_page_pageno
 libogg.so.0:ogg_page_serialno
 libogg.so.0:ogg_page_version
@@ -14,7 +13,6 @@ libogg.so.0:ogg_stream_destroy
 libogg.so.0:ogg_stream_eos
 libogg.so.0:ogg_stream_flush
 libogg.so.0:ogg_stream_flush_fill
-libogg.so.0:ogg_stream_flush_i._GLOBAL___framing.c_A26384A8_0xeb8b116cae7a0c5c.resolver
 libogg.so.0:ogg_stream_init
 libogg.so.0:ogg_stream_iovecin
 libogg.so.0:ogg_stream_packetin

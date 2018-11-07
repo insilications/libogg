@@ -4,14 +4,14 @@
 #
 Name     : libogg
 Version  : 1.3.3
-Release  : 23
+Release  : 24
 URL      : http://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.xz
 Source0  : http://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.xz
 Summary  : Ogg Bitstream Library Development
 Group    : Development/Tools
 License  : BSD-3-Clause
-Requires: libogg-lib
-Requires: libogg-doc
+Requires: libogg-lib = %{version}-%{release}
+Requires: libogg-license = %{version}-%{release}
 BuildRequires : gcc-dev32
 BuildRequires : gcc-libgcc32
 BuildRequires : gcc-libstdc++32
@@ -26,8 +26,8 @@ both making ogg bitstreams and getting packets from ogg bitstreams.
 %package dev
 Summary: dev components for the libogg package.
 Group: Development
-Requires: libogg-lib
-Provides: libogg-devel
+Requires: libogg-lib = %{version}-%{release}
+Provides: libogg-devel = %{version}-%{release}
 
 %description dev
 dev components for the libogg package.
@@ -36,8 +36,8 @@ dev components for the libogg package.
 %package dev32
 Summary: dev32 components for the libogg package.
 Group: Default
-Requires: libogg-lib32
-Requires: libogg-dev
+Requires: libogg-lib32 = %{version}-%{release}
+Requires: libogg-dev = %{version}-%{release}
 
 %description dev32
 dev32 components for the libogg package.
@@ -54,6 +54,7 @@ doc components for the libogg package.
 %package lib
 Summary: lib components for the libogg package.
 Group: Libraries
+Requires: libogg-license = %{version}-%{release}
 
 %description lib
 lib components for the libogg package.
@@ -62,9 +63,18 @@ lib components for the libogg package.
 %package lib32
 Summary: lib32 components for the libogg package.
 Group: Default
+Requires: libogg-license = %{version}-%{release}
 
 %description lib32
 lib32 components for the libogg package.
+
+
+%package license
+Summary: license components for the libogg package.
+Group: Default
+
+%description license
+license components for the libogg package.
 
 
 %prep
@@ -85,7 +95,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1523043512
+export SOURCE_DATE_EPOCH=1541615172
 export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
@@ -95,6 +105,7 @@ make  %{?_smp_mflags}
 
 pushd ../build32/
 export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
+export ASFLAGS="$ASFLAGS --32"
 export CFLAGS="$CFLAGS -m32"
 export CXXFLAGS="$CXXFLAGS -m32"
 export LDFLAGS="$LDFLAGS -m32"
@@ -106,15 +117,15 @@ pushd ../buildavx2/
 export CFLAGS="$CFLAGS -m64 -march=haswell"
 export CXXFLAGS="$CXXFLAGS -m64 -march=haswell"
 export LDFLAGS="$LDFLAGS -m64 -march=haswell"
-%configure --disable-static    --libdir=/usr/lib64/haswell --bindir=/usr/bin/haswell
+%configure --disable-static
 make  %{?_smp_mflags}
 popd
 unset PKG_CONFIG_PATH
 pushd ../buildavx512/
-export CFLAGS="$CFLAGS -m64 -march=skylake-avx512"
-export CXXFLAGS="$CXXFLAGS -m64 -march=skylake-avx512"
+export CFLAGS="$CFLAGS -m64 -march=skylake-avx512 -mprefer-vector-width=512"
+export CXXFLAGS="$CXXFLAGS -m64 -march=skylake-avx512 -mprefer-vector-width=512"
 export LDFLAGS="$LDFLAGS -m64 -march=skylake-avx512"
-%configure --disable-static    --libdir=/usr/lib64/haswell/avx512_1 --bindir=/usr/bin/haswell/avx512_1
+%configure --disable-static
 make  %{?_smp_mflags}
 popd
 %check
@@ -123,10 +134,18 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
+cd ../build32;
+make VERBOSE=1 V=1 %{?_smp_mflags} check || :
+cd ../buildavx2;
+make VERBOSE=1 V=1 %{?_smp_mflags} check || :
+cd ../buildavx512;
+make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1523043512
+export SOURCE_DATE_EPOCH=1541615172
 rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/share/package-licenses/libogg
+cp COPYING %{buildroot}/usr/share/package-licenses/libogg/COPYING
 pushd ../build32/
 %make_install32
 if [ -d  %{buildroot}/usr/lib32/pkgconfig ]
@@ -136,11 +155,11 @@ for i in *.pc ; do ln -s $i 32$i ; done
 popd
 fi
 popd
-pushd ../buildavx2/
-%make_install
-popd
 pushd ../buildavx512/
-%make_install
+%make_install_avx512
+popd
+pushd ../buildavx2/
+%make_install_avx2
 popd
 %make_install
 
@@ -152,6 +171,7 @@ popd
 /usr/include/ogg/config_types.h
 /usr/include/ogg/ogg.h
 /usr/include/ogg/os_types.h
+/usr/lib64/haswell/avx512_1/libogg.so
 /usr/lib64/haswell/libogg.so
 /usr/lib64/libogg.so
 /usr/lib64/pkgconfig/ogg.pc
@@ -164,12 +184,11 @@ popd
 /usr/lib32/pkgconfig/ogg.pc
 
 %files doc
-%defattr(-,root,root,-)
+%defattr(0644,root,root,0755)
 %doc /usr/share/doc/libogg/*
 
 %files lib
 %defattr(-,root,root,-)
-/usr/lib64/haswell/avx512_1/libogg.so
 /usr/lib64/haswell/avx512_1/libogg.so.0
 /usr/lib64/haswell/avx512_1/libogg.so.0.8.3
 /usr/lib64/haswell/libogg.so.0
@@ -181,3 +200,7 @@ popd
 %defattr(-,root,root,-)
 /usr/lib32/libogg.so.0
 /usr/lib32/libogg.so.0.8.3
+
+%files license
+%defattr(0644,root,root,0755)
+/usr/share/package-licenses/libogg/COPYING
