@@ -5,13 +5,19 @@
 %define keepstatic 1
 Name     : libogg
 Version  : 1.3.4
-Release  : 1
+Release  : 2
 URL      : file:///insilications/build/clearlinux/packages/libogg/libogg-v1.3.4.zip
 Source0  : file:///insilications/build/clearlinux/packages/libogg/libogg-v1.3.4.zip
 Summary  : ogg is a library for manipulating ogg bitstreams
 Group    : Development/Tools
 License  : BSD-3-Clause
 Requires: libogg-lib = %{version}-%{release}
+BuildRequires : findutils
+BuildRequires : gcc-dev32
+BuildRequires : gcc-libgcc32
+BuildRequires : gcc-libstdc++32
+BuildRequires : glibc-dev32
+BuildRequires : glibc-libc32
 # Suppress stripping binaries
 %define __strip /bin/true
 %define debug_package %{nil}
@@ -34,6 +40,16 @@ Requires: libogg = %{version}-%{release}
 dev components for the libogg package.
 
 
+%package dev32
+Summary: dev32 components for the libogg package.
+Group: Default
+Requires: libogg-lib32 = %{version}-%{release}
+Requires: libogg-dev = %{version}-%{release}
+
+%description dev32
+dev32 components for the libogg package.
+
+
 %package doc
 Summary: doc components for the libogg package.
 Group: Documentation
@@ -50,6 +66,14 @@ Group: Libraries
 lib components for the libogg package.
 
 
+%package lib32
+Summary: lib32 components for the libogg package.
+Group: Default
+
+%description lib32
+lib32 components for the libogg package.
+
+
 %package staticdev
 Summary: staticdev components for the libogg package.
 Group: Default
@@ -59,10 +83,22 @@ Requires: libogg-dev = %{version}-%{release}
 staticdev components for the libogg package.
 
 
+%package staticdev32
+Summary: staticdev32 components for the libogg package.
+Group: Default
+Requires: libogg-dev = %{version}-%{release}
+
+%description staticdev32
+staticdev32 components for the libogg package.
+
+
 %prep
 %setup -q -n libogg-v1.3.4
 cd %{_builddir}/libogg-v1.3.4
 %patch1 -p1
+pushd ..
+cp -a libogg-v1.3.4 build32
+popd
 
 %build
 ## build_prepend content
@@ -72,7 +108,7 @@ unset http_proxy
 unset https_proxy
 unset no_proxy
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1595039644
+export SOURCE_DATE_EPOCH=1596168720
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -102,16 +138,45 @@ find . -type f -name 'config.status' -exec touch {} \;
 ## make_prepend end
 make  %{?_smp_mflags}  V=1 VERBOSE=1
 
+pushd ../build32/
+## build_prepend content
+find . -type f -name 'configure' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+## build_prepend end
+export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
+export ASFLAGS="${ASFLAGS}${ASFLAGS:+ }--32"
+export CFLAGS="${CFLAGS}${CFLAGS:+ }-m32 -mstackrealign"
+export CXXFLAGS="${CXXFLAGS}${CXXFLAGS:+ }-m32 -mstackrealign"
+export LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-m32 -mstackrealign"
+%autogen  --enable-shared --enable-static --disable-maintainer-mode  --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
+## make_prepend content
+find . -type f -name 'Makefile' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+find . -type f -name 'configure' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+find . -type f -name 'config.status' -exec touch {} \;
+## make_prepend end
+make  %{?_smp_mflags}  V=1 VERBOSE=1
+popd
+
 %check
 export LANG=C.UTF-8
 unset http_proxy
 unset https_proxy
 unset no_proxy
 make VERBOSE=1 V=1 %{?_smp_mflags} check
+cd ../build32;
+make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1595039644
+export SOURCE_DATE_EPOCH=1596168720
 rm -rf %{buildroot}
+pushd ../build32/
+%make_install32
+if [ -d  %{buildroot}/usr/lib32/pkgconfig ]
+then
+pushd %{buildroot}/usr/lib32/pkgconfig
+for i in *.pc ; do ln -s $i 32$i ; done
+popd
+fi
+popd
 %make_install
 
 %files
@@ -125,6 +190,11 @@ rm -rf %{buildroot}
 /usr/lib64/pkgconfig/ogg.pc
 /usr/share/aclocal/*.m4
 
+%files dev32
+%defattr(-,root,root,-)
+/usr/lib32/pkgconfig/32ogg.pc
+/usr/lib32/pkgconfig/ogg.pc
+
 %files doc
 %defattr(0644,root,root,0755)
 %doc /usr/share/doc/libogg/*
@@ -135,6 +205,16 @@ rm -rf %{buildroot}
 /usr/lib64/libogg.so.0
 /usr/lib64/libogg.so.0.8.4
 
+%files lib32
+%defattr(-,root,root,-)
+/usr/lib32/libogg.so
+/usr/lib32/libogg.so.0
+/usr/lib32/libogg.so.0.8.4
+
 %files staticdev
 %defattr(-,root,root,-)
 /usr/lib64/libogg.a
+
+%files staticdev32
+%defattr(-,root,root,-)
+/usr/lib32/libogg.a
