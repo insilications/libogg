@@ -1,5 +1,5 @@
 PKG_NAME := libogg
-URL = https://github.com/xiph/ogg.git
+URL = https://gitlab.xiph.org/xiph/ogg.git
 ARCHIVES = 
 ARCHIVES_GIT = 
 
